@@ -12,52 +12,74 @@ public class WebServer{
 
 	public static void main(String [] args)throws Exception{
 		try(ServerSocket serverSocket = new ServerSocket(8080)){
-			Socket socket = serverSocket.accept();
-            InputStream fromClient = socket.getInputStream();
-            BufferedReader readFromClient = new BufferedReader(new InputStreamReader(fromClient));
-            OutputStream toClient = socket.getOutputStream();
-            PrintWriter pw = new PrintWriter(toClient, true);
+            while (true) {
+                try {
+                    //accept client connect to this server
+                    Socket socket = serverSocket.accept();
+                    
+                    //runnable object of server
+                    Runnable server = () -> {
+                        try{
+                            //Socket socket = serverSocket.accept();
+                            InputStream fromClient = socket.getInputStream();
+                            BufferedReader readFromClient = new BufferedReader(new InputStreamReader(fromClient));
+                            OutputStream toClient = socket.getOutputStream();
+                            PrintWriter pw = new PrintWriter(toClient, true);
 
-            String str = readFromClient.readLine();
-            String fileName = "www"+str.split(" ")[1];
-            System.out.println(fileName);
-            //If file exist
-            if(fileName.equals("www/hello.html")){
-                File file = new File(fileName);
-                BufferedReader readFile = new BufferedReader(new FileReader(file));
-            
-                pw.print("HTTP/1.1 200 OK\r\nContent-type: text/html\r\nContent-length: 124\r\n\r\n");
-                System.out.println("HTTP/1.1 200 OK\r\nContent-type: text/html\r\nContent-length: 124\r\n\r\n");
-                str = readFile.readLine();
-                while(str!= null){
-                    pw.print(str+"\r\n");
-                    str = readFile.readLine();
-                }
-                readFile.close();
-                pw.flush();
-                serverSocket.close();
-                pw.close();
-            }
-            //If file not exist
-            else{
-                File file = new File("www/NotFound.html");
-                BufferedReader readFile = new BufferedReader(new FileReader(file));
+                            String str = readFromClient.readLine();
+                            String fileName = "www"+str.split(" ")[1];
+                            System.out.println(fileName);
+                            //If file exist
+                            if(fileName.equals("www/hello.html")){
+                                File file = new File(fileName);
+                                BufferedReader readFile = new BufferedReader(new FileReader(file));
+                            
+                                pw.print("HTTP/1.1 200 OK\r\nContent-type: text/html\r\nContent-length: 124\r\n\r\n");
+                                System.out.println("HTTP/1.1 200 OK\r\nContent-type: text/html\r\nContent-length: 124\r\n\r\n");
+                                str = readFile.readLine();
+                                while(str!= null){
+                                    pw.print(str+"\r\n");
+                                    str = readFile.readLine();
+                                }
+                                readFile.close();
+                                pw.flush();
+                                //serverSocket.close();
+                                pw.close();
+                            }
+                            //If file not exist
+                            else{
+                                File file = new File("www/NotFound.html");
+                                BufferedReader readFile = new BufferedReader(new FileReader(file));
 
-                pw.print("HTTP/1.1 404 Not Found\r\nContent-type: text/html\r\nContent-length: 126\r\n\r\n");
-                System.out.println("HTTP/1.1 404 Not Found\r\nContent-type: text/html\r\nContent-length: 126\r\n\r\n");
-                str = readFile.readLine();
-                while(str!= null){
-                    //System.out.println(str);
-                    pw.print(str+"\r\n");
-                    str = readFile.readLine();
+                                pw.print("HTTP/1.1 404 Not Found\r\nContent-type: text/html\r\nContent-length: 126\r\n\r\n");
+                                System.out.println("HTTP/1.1 404 Not Found\r\nContent-type: text/html\r\nContent-length: 126\r\n\r\n");
+                                str = readFile.readLine();
+                                while(str!= null){
+                                    //System.out.println(str);
+                                    pw.print(str+"\r\n");
+                                    str = readFile.readLine();
+                                }
+                                readFile.close();
+                                pw.flush();
+                                //serverSocket.close();
+                                pw.close();
+                            }
+                        }
+                        catch(Exception e){
+                            
+                        }
+                        
+                    };
+                    //run multi thread for server
+                    Thread serverThread = new Thread(server);
+                    serverThread.start();
+                    
                 }
-                readFile.close();
-                pw.flush();
-                serverSocket.close();
-                pw.close();
+                catch(Exception e){
+                    
+                }
+                
             }
-            
-            			
-		}
-	}
+        }
+    }
 }
